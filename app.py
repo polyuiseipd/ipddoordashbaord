@@ -13,7 +13,7 @@ import threading
 app = Flask(__name__)
 
 # Configuration
-CALENDAR_URL = "https://outlook.office365.com/owa/calendar/acce68cede284051a60297253e2e11f6@polyu.edu.hk/cc2c548b8b5d4176b0c5949406bfd81717213170944509749253/calendar.ics"
+CALENDAR_URL = os.environ.get('CALENDAR_URL', 'https://outlook.office365.com/owa/calendar/acce68cede284051a60297253e2e11f6@polyu.edu.hk/cc2c548b8b5d4176b0c5949406bfd81717213170944509749253/calendar.ics')
 CACHE_FILE = "calendar_cache.ics"
 CACHE_EXPIRY = 10 * 60  # 10 minutes in seconds
 
