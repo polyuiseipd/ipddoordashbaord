@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integrated Product Design Lab Status</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Aptos:wght@400;500;700&display=swap">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Aptos', sans-serif;
+            overflow: hidden;
+            height: 100vh;
+            width: 100vw;
+        }
+        
+        .main-container {
+            display: grid;
+            grid-template-columns: 75% 25%;
+            grid-template-rows: auto auto auto 1fr auto;
+            height: 100vh;
+            width: 100vw;
+            background-size: cover;
+            background-position: center;
+            color: white;
+        }
+        
+        /* Section 1: Top Panel */
+        .section-1 {
+            grid-column: 1 / 2;
+            grid-row: 1 / 2;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            border: 1px dashed transparent;
+        }
+        
+        .dept-logo {
+            height: 60px;
+        }
+        
+        .datetime {
+            font-size: 2.2em;
+            font-weight: bold;
+            text-align: right;
+        }
+        
+        /* Section 2: Schedule Panel (Right Side) */
+        .section-2 {
+            grid-column: 2 / 3;
+            grid-row: 1 / 6;
+            background-color: rgba(200, 200, 200, 0.5);
+            overflow: hidden;
+            position: relative;
+            border: 1px dashed transparent;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .time-slots-container {
+            flex-grow: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
+        
+        .time-slot {
+            position: absolute;
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 1px; /* Just a line */
+        }
+        
+        .time-label {
+            width: 50px;
+            text-align: right;
+            padding-right: 10px;
+            font-size: 0.9em;
+            color: #fff;
+            flex-shrink: 0;
+            position: absolute;
+            top: -10px; /* Position above the line */
+            left: 0;
+        }
+        
+        .time-content {
+            flex-grow: 1;
+            height: 1px;
+            width: calc(100% - 60px);
+            background-color: rgba(255, 255, 255, 0.5);
+            margin-left: 50px;
+        }
+        
+        .event {
+            position: absolute;
+            width: calc(100% - 60px); /* Match width of time-content */
+            left: 50px;
+            background-color: rgba(255, 255, 255, 0.5); /* Increased opacity */
+            color: white;
+            padding: 5px 10px;
+            overflow: hidden;
+            z-index: 2;
+            border-radius: 5px; /* Added rounded corners */
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .event-title {
+            font-size: 1em;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .event-time {
+            font-size: 0.8em;
+            opacity: 0.9;
+        }
+        
+        .timeline {
+            position: absolute;
+            left: 50px;
+            right: 10px;
+            height: 2px;
+            background-color: white;
+            z-index: 3;
+        }
+        
+        .timeline:before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: -3px;
+            width: 8px;
+            height: 8px;
+            background-color: white;
+            border-radius: 50%;
+        }
+        
+        /* Section 3: Room Information */
+        .section-3 {
+            grid-column: 1 / 2;
+            grid-row: 2 / 3;
+            padding: 20px;
+            border: 1px dashed transparent;
+        }
+        
+        .room-number {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .room-name {
+            font-size: 1.2em;
+        }
+        
+        /* Section 4: Status Display */
+        .section-4 {
+            grid-column: 1 / 2;
+            grid-row: 3 / 4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+            border: 1px dashed transparent;
+        }
+        
+        .status {
+            font-size: 6em;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* Section 5: Message Display */
+        .section-5 {
+            grid-column: 1 / 2;
+            grid-row: 4 / 5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            border: 1px dashed transparent;
+        }
+        
+        .message {
+            font-size: 2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .clock-icon {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid white;
+            position: relative;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+        
+        .clock-icon:before {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 12px;
+            background-color: white;
+            transform: translate(-50%, -100%);
+            transform-origin: bottom center;
+        }
+        
+        .clock-icon:after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 1px;
+            height: 8px;
+            background-color: white;
+            transform: translate(-50%, -100%) rotate(90deg);
+            transform-origin: bottom center;
+        }
+        
+        /* Section 6: QR Code and Booking Info */
+        .section-6 {
+            grid-column: 1 / 2;
+            grid-row: 5 / 6;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            border: 1px dashed transparent;
+        }
+        
+        .qr-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .qr-code {
+            height: 70px;
+        }
+        
+        .booking-text {
+            margin-left: 15px;
+            font-size: 1em;
+        }
+        
+        .booking-title {
+            font-weight: bold;
+        }
+        
+        .booking-subtitle {
+            font-style: italic;
+            font-size: 0.8em;
+        }
+        
+        .calendar-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .calendar-text {
+            margin-right: 15px;
+            font-size: 1em;
+            text-align: right;
+        }
+        
+        .calendar-title {
+            font-weight: bold;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 1200px) {
+            .status {
+                font-size: 5em;
+            }
+            
+            .message {
+                font-size: 1.8em;
+            }
+            
+            .datetime {
+                font-size: 1.8em;
+            }
+        }
+        
+        @media (max-width: 992px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto auto auto auto auto 30vh;
+            }
+            
+            .section-1 {
+                grid-column: 1 / 2;
+            }
+            
+            .section-2 {
+                grid-column: 1 / 2;
+                grid-row: 6 / 7;
+            }
+            
+            .section-3, .section-4, .section-5, .section-6 {
+                grid-column: 1 / 2;
+            }
+            
+            .status {
+                font-size: 4em;
+            }
+            
+            .message {
+                font-size: 1.5em;
+            }
+            
+            .section-6 {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .calendar-container {
+                align-self: flex-end;
+            }
+            
+            .calendar-text {
+                text-align: left;
+                margin-right: 15px;
+                margin-left: 0;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .status {
+                font-size: 3em;
+            }
+            
+            .message {
+                font-size: 1.3em;
+            }
+            
+            .datetime {
+                font-size: 1.5em;
+            }
+            
+            .section-6 {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .calendar-container {
+                align-self: center;
+                flex-direction: column;
+                margin-top: 15px;
+            }
+            
+            .calendar-text {
+                text-align: center;
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container" id="main-container">
+        <!-- Section 1: Top Panel (Logo and DateTime) -->
+        <div class="section-1">
+            <img src="/static/images/dept_logo.png" alt="Department Logo" class="dept-logo">
+            <div class="datetime" id="datetime">26/03/2025, 17:52:00</div>
+        </div>
+        
+        <!-- Section 2: Schedule Panel (Right Side) -->
+        <div class="section-2">
+            <div class="time-slots-container" id="time-slots-container">
+                <!-- Time slots will be generated dynamically -->
+            </div>
+        </div>
+        
+        <!-- Section 3: Room Information -->
+        <div class="section-3">
+            <div class="room-number">FJ403-404</div>
+            <div class="room-name">Integrated Product Design Lab</div>
+        </div>
+        
+        <!-- Section 4: Status Display -->
+        <div class="section-4">
+            <div class="status" id="status">Available</div>
+        </div>
+        
+        <!-- Section 5: Message Display -->
+        <div class="section-5">
+            <div class="message">
+                <div class="clock-icon"></div>
+                <span id="message-text">No More Events Today</span>
+            </div>
+        </div>
+        
+        <!-- Section 6: QR Codes and Info -->
+        <div class="section-6">
+            <!-- Left QR Code for Booking -->
+            <div class="qr-container">
+                <img src="/static/images/qr_code.png" alt="QR Code" class="qr-code">
+                <div class="booking-text">
+                    <div class="booking-title">Online Booking System</div>
+                    <div class="booking-subtitle">(for ISE Academic Staff only)</div>
+                </div>
+            </div>
+            
+            <!-- Right QR Code for Calendar -->
+            <div class="calendar-container">
+                <div class="calendar-text">
+                    <div class="calendar-title">View Full Calendar</div>
+                </div>
+                <img src="/static/images/full_qr_code.png" alt="Full Calendar QR Code" class="qr-code">
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Update date and time
+        function updateDateTime() {
+            const now = new Date();
+            
+            // Format date as DD/MM/YYYY
+            const day = String(now.getDate()).padStart(2, '0');
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const year = now.getFullYear();
+            
+            // Format time as HH:MM:SS
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            
+            // Update the datetime element
+            document.getElementById('datetime').textContent = `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+        }
+        
+        // Function to specifically update the timeline position
+        function updateTimelinePosition(hours, minutes, seconds) {
+            // Remove existing timeline
+            const existingTimeline = document.querySelector('.timeline');
+            if (existingTimeline) {
+                existingTimeline.remove();
+            }
+            
+            // Calculate percentage for timeline positioning
+            const dayStart = 8.5; // 8:30
+            const dayEnd = 21.5; // 21:30
+            const dayDuration = dayEnd - dayStart;
+            
+            const currentTime = hours + (minutes / 60) + (seconds / 3600);
+            
+            // Only show if within display time
+            if (currentTime >= dayStart && currentTime <= dayEnd) {
+                const timePercent = ((currentTime - dayStart) / dayDuration) * 100;
+                
+                // Create timeline element
+                const timeline = document.createElement('div');
+                timeline.className = 'timeline';
+                timeline.style.top = `${timePercent}%`;
+                
+                // Add to the container
+                const container = document.getElementById('time-slots-container');
+                container.appendChild(timeline);
+            }
+        }
+        
+        // Generate the calendar view with events
+        function generateCalendarView(events) {
+            const container = document.getElementById('time-slots-container');
+            container.innerHTML = '';
+            
+            // Constants for time range
+            const dayStart = 8.5; // 8:30
+            const dayEnd = 21.5; // 21:30
+            const dayDuration = dayEnd - dayStart;
+            
+            // Create time slots from 8:30 to 21:30 at hourly intervals
+            for (let hour = 8; hour <= 21; hour++) {
+                // Create half-hour mark if needed
+                if (hour === 8) {
+                    createTimeSlot("08:30", ((8.5 - dayStart) / dayDuration) * 100);
+                }
+                
+                // Create hour mark if not the first one (which is 08:30)
+                if (hour > 8) {
+                    createTimeSlot(`${hour.toString().padStart(2, '0')}:30`, ((hour + 0.5 - dayStart) / dayDuration) * 100);
+                }
+            }
+            
+            // Add events to the schedule
+            if (events && events.length > 0) {
+                events.forEach(event => {
+                    // Get precise times from the event data
+                    const startHour = event.start_hour;
+                    const startMinute = event.start_minute;
+                    const endHour = event.end_hour;
+                    const endMinute = event.end_minute;
+                    
+                    // Calculate decimal times
+                    const eventStart = startHour + (startMinute / 60);
+                    const eventEnd = endHour + (endMinute / 60);
+                    
+                    // Skip events outside our display range
+                    if (eventEnd < dayStart || eventStart > dayEnd) {
+                        return;
+                    }
+                    
+                    // Adjust times to fit within our display range if needed
+                    const displayStart = Math.max(eventStart, dayStart);
+                    const displayEnd = Math.min(eventEnd, dayEnd);
+                    
+                    // Calculate percentages for positioning
+                    const startPercent = ((displayStart - dayStart) / dayDuration) * 100;
+                    const heightPercent = ((displayEnd - displayStart) / dayDuration) * 100;
+                    
+                    // Format time range for display
+                    const startTimeFormatted = event.start;
+                    const endTimeFormatted = event.end;
+                    const timeRange = `${startTimeFormatted}-${endTimeFormatted}`;
+                    
+                    // Create event element
+                    const eventElement = document.createElement('div');
+                    eventElement.className = 'event';
+                    eventElement.style.top = `${startPercent}%`;
+                    eventElement.style.height = `${heightPercent}%`;
+                    
+                    // Create title element
+                    const titleElement = document.createElement('div');
+                    titleElement.className = 'event-title';
+                    titleElement.textContent = event.title;
+                    
+                    // Create time element
+                    const timeElement = document.createElement('div');
+                    timeElement.className = 'event-time';
+                    timeElement.textContent = timeRange;
+                    
+                    // Add to event element
+                    eventElement.appendChild(titleElement);
+                    eventElement.appendChild(timeElement);
+                    
+                    // Add to the container
+                    container.appendChild(eventElement);
+                });
+            }
+            
+            function createTimeSlot(timeText, topPercent) {
+                const timeSlot = document.createElement('div');
+                timeSlot.className = 'time-slot';
+                timeSlot.style.top = `${topPercent}%`;
+                
+                const timeLabel = document.createElement('div');
+                timeLabel.className = 'time-label';
+                timeLabel.textContent = timeText;
+                
+                const timeContent = document.createElement('div');
+                timeContent.className = 'time-content';
+                
+                timeSlot.appendChild(timeLabel);
+                timeSlot.appendChild(timeContent);
+                container.appendChild(timeSlot);
+            }
+        }
+        
+        // Update status and fetch event data
+        function updateStatus() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update status display
+                    document.getElementById('status').textContent = data.status;
+                    
+                    // Determine message text based on status
+                    document.getElementById('message-text').textContent = data.message;
+                    
+                    // Update background image based on status
+                    const container = document.getElementById('main-container');
+                    
+                    if (data.color === 'green') {
+                        container.style.backgroundImage = "url('/static/images/green.jpg')";
+                    } else if (data.color === 'red') {
+                        container.style.backgroundImage = "url('/static/images/red.JPG')";
+                    } else {
+                        container.style.backgroundImage = "url('/static/images/grey.jpg')";
+                    }
+                    
+                    // Generate calendar view
+                    generateCalendarView(data.events);
+                    
+                    // Update timeline with server time
+                    if (data.current_hour !== undefined && data.current_minute !== undefined) {
+                        updateTimelinePosition(data.current_hour, data.current_minute, data.current_second || 0);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching status:', error);
+                });
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Update status immediately and then every 30 seconds
+            updateStatus();
+            setInterval(updateStatus, 30000); // Every 30 seconds for status updates
+            
+            // Update date/time every second
+            updateDateTime();
+            setInterval(updateDateTime, 1000);
+        });
+    </script>
+</body>
+</html>
