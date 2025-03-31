@@ -17,6 +17,13 @@ CALENDAR_URL = os.environ.get('CALENDAR_URL', 'https://outlook.office365.com/owa
 CACHE_FILE = "calendar_cache.ics"
 CACHE_EXPIRY = 10 * 60  # 10 minutes in seconds
 
+# Define office hours
+OFFICE_START_HOUR = 8
+OFFICE_START_MINUTE = 30
+OFFICE_END_HOUR = 17
+OFFICE_END_MINUTE = 30
+WEEKDAYS = [0, 1, 2, 3, 4]  # Monday to Friday (0-4)
+
 # Global variable to store the cached calendar data
 calendar_cache = {
     "data": None,
@@ -276,6 +283,10 @@ def status():
     current_minute = now.minute
     current_second = now.second
     current_date = now.strftime('%Y-%m-%d')
+    current_weekday = now.weekday()  # 0 is Monday, 6 is Sunday
+    
+    # Calculate current time as decimal for comparison
+    current_time_decimal = current_hour + (current_minute / 60)
     
     # Fetch and parse calendar data
     calendar_text = get_calendar_data()
@@ -287,15 +298,38 @@ def status():
     # Sort events by start time
     today_events.sort(key=lambda x: (x['start_hour'], x['start_minute']))
     
-    # Calculate current time as decimal for comparison
-    current_time_decimal = current_hour + (current_minute / 60)
-    
-    # Check if we're in an active event
+    # Set default status values
     status_message = "No More Events Today"
     lab_status = "Available"
     color = "green"
     
-    # Iterate through today's events to determine status
+    # Find latest event end time for today to determine extended office hours
+    latest_event_end_time = OFFICE_END_HOUR + (OFFICE_END_MINUTE / 60)
+    
+    for event in today_events:
+        if event['is_busy']:
+            event_end_time = event['end_hour'] + (event['end_minute'] / 60)
+            if event_end_time > latest_event_end_time:
+                latest_event_end_time = event_end_time
+    
+    # Check if current time is within office hours or during an event
+    is_within_office_hours = False
+    
+    # First check if it's a weekday
+    if current_weekday in WEEKDAYS:
+        office_start_time = OFFICE_START_HOUR + (OFFICE_START_MINUTE / 60)
+        
+        # Include events that may extend office hours
+        if current_time_decimal >= office_start_time and current_time_decimal <= latest_event_end_time:
+            is_within_office_hours = True
+    
+    # If not in office hours, set to grey unless there's an active event
+    if not is_within_office_hours:
+        lab_status = "Closed"
+        color = "grey"
+        status_message = "Out of Office Hours"
+    
+    # Check if there's an active event (this overrides the office hours check)
     for event in today_events:
         start_hour = event['start_hour']
         start_minute = event['start_minute']
@@ -320,9 +354,13 @@ def status():
                     minutes = remaining_minutes % 60
                     status_message = f"Ends in {hours}h {minutes}m"
                 break
+            elif color == "grey":
+                # If we're in a non-busy event but outside office hours, 
+                # keep the status as closed but update the message
+                status_message = "Out of Office Hours (Event in Progress)"
         
-        # If there's an upcoming event
-        if current_time_decimal < start_decimal:
+        # If we're in office hours with no current event, check for upcoming events
+        elif is_within_office_hours and color == "green" and current_time_decimal < start_decimal:
             # Check if event is marked as busy
             if event['is_busy']:
                 minutes_until_start = int((start_decimal - current_time_decimal) * 60)
@@ -342,7 +380,8 @@ def status():
         'events': today_events,
         'current_hour': current_hour,
         'current_minute': current_minute,
-        'current_second': current_second
+        'current_second': current_second,
+        'is_office_hours': is_within_office_hours
     })
 
 if __name__ == '__main__':
